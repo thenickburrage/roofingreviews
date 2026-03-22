@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roofing Prospect Machine — Ambitions Web</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e8e9ed;min-height:100vh;padding:24px;}
+  h1{font-size:22px;font-weight:600;letter-spacing:-0.3px;color:#fff;}
+  p{font-size:14px;color:#8b8d9a;line-height:1.6;}
+  a{color:#6c8fff;}
+  .container{max-width:780px;margin:0 auto;}
+  .header{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+  .logo{width:32px;height:32px;background:#6c8fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
+  .subtitle{font-size:13px;color:#4d4f5e;margin-bottom:28px;}
+  .card{background:#1a1c25;border:1px solid #2a2c38;border-radius:12px;padding:20px 24px;margin-bottom:16px;}
+  .card-title{font-size:11px;font-weight:500;color:#4d4f5e;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:14px;}
+  label{display:block;font-size:13px;color:#8b8d9a;margin-bottom:6px;}
+  input[type=text],input[type=password]{width:100%;background:#12131a;border:1px solid #2a2c38;border-radius:8px;padding:10px 14px;font-size:14px;color:#e8e9ed;outline:none;transition:border-color 0.15s;}
+  input[type=text]:focus,input[type=password]:focus{border-color:#6c8fff;}
+  input::placeholder{color:#3d3f4d;}
+  .field{margin-bottom:16px;}
+  button{cursor:pointer;border:none;border-radius:8px;font-size:14px;font-weight:500;transition:all 0.15s;}
+  .btn-primary{background:#6c8fff;color:#fff;padding:10px 20px;}
+  .btn-primary:hover:not(:disabled){background:#5a7aff;}
+  .btn-primary:disabled{background:#2a2c38;color:#4d4f5e;cursor:not-allowed;}
+  .btn-ghost{background:#1a1c25;color:#8b8d9a;padding:8px 14px;border:1px solid #2a2c38;font-size:13px;}
+  .btn-ghost:hover{background:#22242f;color:#c9cad4;}
+  .btn-small{background:#22242f;color:#8b8d9a;padding:5px 12px;border:1px solid #2a2c38;font-size:12px;border-radius:6px;}
+  .btn-small:hover:not(:disabled){background:#2a2c38;color:#c9cad4;}
+  .btn-small:disabled{opacity:0.4;cursor:not-allowed;}
+  .btn-action{background:#1e2635;color:#6c8fff;padding:5px 12px;border:1px solid #2a3550;font-size:12px;border-radius:6px;}
+  .btn-action:hover{background:#243044;}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+  .stat{background:#12131a;border-radius:10px;padding:12px 14px;}
+  .stat-label{font-size:11px;color:#4d4f5e;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+  .stat-value{font-size:24px;font-weight:600;}
+  .sv-white{color:#fff;} .sv-orange{color:#f5a623;} .sv-green{color:#4caf7d;}
+  .filter-row{display:flex;gap:6px;margin-bottom:14px;align-items:center;flex-wrap:wrap;}
+  .filter-btn{background:transparent;color:#6b6d7a;padding:5px 12px;border:1px solid #2a2c38;font-size:12px;border-radius:20px;cursor:pointer;transition:all 0.15s;}
+  .filter-btn.active{background:#1e2635;color:#6c8fff;border-color:#2a3550;}
+  .filter-actions{margin-left:auto;display:flex;gap:6px;}
+  .lead{background:#12131a;border:1px solid #1e2028;border-left:3px solid transparent;border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+  .lead.flagged{border-left-color:#f5a623;}
+  .lead-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;}
+  .lead-name{font-size:14px;font-weight:500;color:#e8e9ed;flex:1;}
+  .lead-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .lead-meta span{font-size:12px;color:#6b6d7a;}
+  .r-bad{color:#e05c5c;font-weight:600;} .r-mid{color:#f5a623;font-weight:600;} .r-good{color:#4caf7d;font-weight:600;}
+  .badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;white-space:nowrap;}
+  .bg-orange{background:#2d2010;color:#f5a623;} .bg-green{background:#0d2416;color:#4caf7d;}
+  .bg-blue{background:#0e1a2d;color:#6c8fff;} .bg-red{background:#2d1010;color:#e05c5c;}
+  .lead-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px;}
+  .lead-status{font-size:12px;color:#4d4f5e;}
+  .contacts-list{margin-top:8px;border:1px solid #1e2028;border-radius:8px;overflow:hidden;}
+  .contact-row{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid #12131a;}
+  .contact-row:last-child{border-bottom:none;}
+  .contact-row:hover{background:#1a1c25;}
+  .contact-row.sel{background:#0e1a2d;}
+  .radio{width:14px;height:14px;border-radius:50%;border:1px solid #3d3f4d;flex-shrink:0;}
+  .radio.sel{background:#6c8fff;border-color:#6c8fff;box-shadow:inset 0 0 0 3px #0e1a2d;}
+  .contact-info{flex:1;min-width:0;}
+  .contact-name{font-size:13px;font-weight:500;color:#c9cad4;}
+  .contact-detail{font-size:12px;color:#4d4f5e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .contact-score{font-size:11px;color:#3d3f4d;flex-shrink:0;}
+  .success-box{background:#0a1f14;border:1px solid #1a3828;border-radius:8px;padding:12px 14px;margin-bottom:16px;}
+  .success-box p{color:#3d8f5f;font-size:13px;}
+  .error-box{background:#1f0a0a;border:1px solid #3d1515;border-radius:8px;padding:12px 14px;margin-top:10px;}
+  .error-box p{color:#c04a4a;font-size:13px;}
+  .loading-box{background:#12131a;border:1px solid #1e2028;border-radius:8px;padding:12px 14px;margin-top:10px;}
+  .loading-box p{color:#6b6d7a;font-size:13px;}
+  .search-row{display:flex;gap:8px;margin-bottom:10px;}
+  .search-row input{flex:1;}
+  @media(max-width:500px){.stats-grid{grid-template-columns:repeat(2,1fr);}body{padding:14px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">R</div>
+    <h1>Roofing Prospect Machine</h1>
+  </div>
+  <p class="subtitle">Ambitions Web &middot; Review management outreach &middot; US roofing niche</p>
+
+  <!-- SETUP -->
+  <div id="view-setup">
+    <div class="card">
+      <div class="card-title">API connections</div>
+      <div class="field">
+        <label>Outscraper API key</label>
+        <input type="password" id="outscraper-key" placeholder="Get from app.outscraper.com — profile icon — API Key"/>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Hunter.io API key</label>
+        <input type="password" id="hunter-key" placeholder="Get from hunter.io/api-keys"/>
+      </div>
+    </div>
+    <div class="success-box"><p>&#10003; ClickUp pre-configured &mdash; Lead Database &middot; Assigned to Nick Burrage &middot; Reviews Campaign auto-checked</p></div>
+    <button class="btn-primary" onclick="startApp()">Connect and start prospecting &rarr;</button>
+  </div>
+
+  <!-- SEARCH -->
+  <div id="view-search" style="display:none;">
+    <button class="btn-ghost" onclick="showView('setup')" style="margin-bottom:20px;">&larr; API keys</button>
+    <div class="card">
+      <div class="card-title">Search a city</div>
+      <p style="margin-bottom:16px;">Enter any US city. Companies with under 4.5 stars or fewer than 100 reviews are flagged as weak prospects &mdash; your primary targets.</p>
+      <div class="search-row">
+        <input type="text" id="city-input" placeholder="e.g. Tampa FL" onkeydown="if(event.key==='Enter')runSearch()"/>
+        <button class="btn-primary" id="btn-search" onclick="runSearch()">Scan &rarr;</button>
+      </div>
+      <div id="search-status"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="view-results" style="display:none;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
+      <button class="btn-ghost" onclick="showView('search')">&larr; New city</button>
+      <span id="results-title" style="font-size:14px;color:#4d4f5e;flex:1;"></span>
+      <button class="btn-ghost" onclick="showView('setup')">API keys</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-label">Found</div><div class="stat-value sv-white" id="stat-total">0</div></div>
+      <div class="stat"><div class="stat-label">Weak profiles</div><div class="stat-value sv-orange" id="stat-weak">0</div></div>
+      <div class="stat"><div class="stat-label">Emails found</div><div class="stat-value sv-green" id="stat-enriched">0</div></div>
+      <div class="stat"><div class="stat-label">In ClickUp</div><div class="stat-value sv-green" id="stat-pushed">0</div></div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" id="filter-weak" onclick="setFilter('weak')">Weak profiles</button>
+      <button class="filter-btn" id="filter-all" onclick="setFilter('all')">All</button>
+      <button class="filter-btn" id="filter-strong" onclick="setFilter('strong')">Strong</button>
+      <div class="filter-actions">
+        <button class="btn-small" id="btn-enrich-all" onclick="enrichAll()">Find all emails</button>
+        <button class="btn-small" id="btn-push-all" onclick="pushAll()">Push all to ClickUp</button>
+      </div>
+    </div>
+    <div id="leads-container"></div>
+  </div>
+</div>
+
+<script>
+const CLICKUP_KEY='pk_93762622_DGTPA5YQ4WFC3X9DWSG4N7LJ5VCGQ0OF';
+const LIST_ID='901216367975';
+const NICK_ID=93762622;
+const F={
+  companyName:'d4dc5669-660d-45eb-9ebf-a631ae78265d',
+  starRating:'359b9e3a-4807-46ca-87b7-21dbb1b8a995',
+  reviewCount:'903997cf-d916-4ad2-b200-e0ddebace4a0',
+  website:'1300f4ca-3cd7-4016-b6c1-d7d024f05577',
+  mapsUrl:'a73f72c3-1320-488a-bb84-14652571cbb0',
+  phone:'e94eda30-b0fd-44dc-bfb8-378bfa2de4e8',
+  city:'fc2469f5-7356-4ebe-960e-a750c24aa0bc',
+  primaryContact:'b0381e44-8957-483a-895f-b3e194ffa0ab',
+  email:'d0c60c0e-bd38-47bf-9621-19babcd28013',
+  jobTitle:'51096449-06f9-4ac9-bbc7-cf66bc6187f6',
+  hunterConfidence:'4ab5df40-58f4-4735-87e8-47494cc3befe',
+  notes:'527aa961-2cd4-4470-99e6-9f318dc27f0d',
+  industry:'446d46f5-cc33-40aa-8db9-3d3e30d04d56',
+  reviewsCampaign:'fac778c1-3f19-4955-bd0c-1f8b0c935d1f',
+};
+
+let leads=[],currentFilter='weak',outscraperKey='',hunterKey='',currentCity='';
+
+function showView(v){
+  ['setup','search','results'].forEach(n=>{
+    document.getElementById('view-'+n).style.display=n===v?'block':'none';
+  });
+}
+
+function startApp(){
+  outscraperKey=document.getElementById('outscraper-key').value.trim();
+  hunterKey=document.getElementById('hunter-key').value.trim();
+  if(!outscraperKey||!hunterKey){alert('Please enter both API keys.');return;}
+  showView('search');
+}
+
+async function runSearch(){
+  const city=document.getElementById('city-input').value.trim();
+  if(!city)return;
+  currentCity=city; leads=[];
+  const btn=document.getElementById('btn-search');
+  const status=document.getElementById('search-status');
+  btn.disabled=true; btn.textContent='Scanning\u2026';
+  status.innerHTML='<div class="loading-box"><p>Sending request to Outscraper\u2026</p></div>';
+  try{
+    const q=encodeURIComponent('roofing contractors '+city);
+    const r=await fetch('https://api.app.outscraper.com/maps/search-v3?query='+q+'&limit=5&language=en',{headers:{'X-API-KEY':outscraperKey}});
+    if(!r.ok) throw new Error('Outscraper error '+r.status+' \u2014 please check your API key');
+    const d=await r.json();
+    let results=[];
+    if(d.id&&(d.status==='Pending'||d.status==='pending')){
+      results=await pollOutscraper(d.id,status);
+    } else {
+      results=d.data?.[0]||d.results||[];
+    }
+    if(!results.length) throw new Error('No results \u2014 try a different format e.g. "Tampa FL"');
+    leads=results.map((r,i)=>({
+      id:r.place_id||'lead-'+i,
+      name:r.name||'Unknown',
+      rating:parseFloat(r.rating)||0,
+      reviews:parseInt(r.reviews)||0,
+      website:r.website||null,
+      phone:r.phone||null,
+      city:city,
+      mapsUrl:r.url||r.place_url||null,
+      domain:extractDomain(r.website),
+      contacts:null,selectedContact:0,
+      hunterStatus:'idle',clickupStatus:'idle',
+      flagged:(parseFloat(r.rating)||0)<4.5||(parseInt(r.reviews)||0)<100,
+    }));
+    showView('results');
+    document.getElementById('results-title').textContent=city+' \u2014 '+leads.length+' companies found';
+    setFilter('weak'); updateStats();
+  } catch(e){
+    status.innerHTML='<div class="error-box"><p>'+e.message+'</p></div>';
+  } finally {
+    btn.disabled=false; btn.textContent='Scan \u2192';
+  }
+}
+
+async function pollOutscraper(taskId,statusEl){
+  for(let i=0;i<25;i++){
+    await sleep(3000);
+    statusEl.innerHTML='<div class="loading-box"><p>Waiting for results\u2026 '+((i+1)*3)+'s</p></div>';
+    const r=await fetch('https://api.app.outscraper.com/requests/'+taskId,{headers:{'X-API-KEY':outscraperKey}});
+    const d=await r.json();
+    if(d.status==='Success') return d.data?.[0]||[];
+    if(d.status==='Failed') throw new Error('Outscraper task failed \u2014 please try again');
+  }
+  throw new Error('Search timed out \u2014 please try again');
+}
+
+async function enrichLead(id){
+  const lead=leads.find(l=>l.id===id);
+  if(!lead||!lead.domain) return;
+  lead.hunterStatus='loading'; renderLeads();
+  try{
+    const r=await fetch('https://api.hunter.io/v2/domain-search?domain='+lead.domain+'&api_key='+hunterKey+'&limit=10');
+    const d=await r.json();
+    const contacts=d.data?.emails||[];
+    if(!contacts.length){lead.hunterStatus='notfound';}
+    else{
+      contacts.sort((a,b)=>(b.confidence||0)-(a.confidence||0));
+      lead.contacts=contacts; lead.selectedContact=0; lead.hunterStatus='done';
+    }
+  } catch{lead.hunterStatus='error';}
+  updateStats(); renderLeads();
+}
+
+async function enrichAll(){
+  const todo=getFiltered().filter(l=>l.domain&&l.hunterStatus==='idle');
+  for(const l of todo){await enrichLead(l.id);await sleep(500);}
+}
+
+async function pushToClickup(id){
+  const lead=leads.find(l=>l.id===id);
+  if(!lead) return;
+  lead.clickupStatus='loading'; renderLeads();
+  try{
+    const chosen=(lead.contacts&&lead.contacts.length>0)?lead.contacts[lead.selectedContact||0]:null;
+    const allContactsText=(lead.contacts&&lead.contacts.length>0)
+      ?lead.contacts.map(c=>{
+          const nm=[c.first_name,c.last_name].filter(Boolean).join(' ')||'(no name)';
+          return nm+' \u2014 '+(c.position||'no title')+' \u2014 '+c.value+' ('+(c.confidence||0)+'% confidence)';
+        }).join('\n')
+      :'No contacts found via Hunter.io';
+
+    const cf=[
+      {id:F.companyName,value:lead.name},
+      {id:F.starRating,value:lead.rating||0},
+      {id:F.reviewCount,value:lead.reviews||0},
+      {id:F.city,value:lead.city||''},
+      {id:F.industry,value:'Roofing'},
+      {id:F.reviewsCampaign,value:true},
+      {id:F.notes,value:allContactsText},
+    ];
+    if(lead.website)  cf.push({id:F.website,value:lead.website});
+    if(lead.mapsUrl)  cf.push({id:F.mapsUrl,value:lead.mapsUrl});
+    if(lead.phone)    cf.push({id:F.phone,value:lead.phone});
+    if(chosen){
+      const nm=[chosen.first_name,chosen.last_name].filter(Boolean).join(' ');
+      if(nm)               cf.push({id:F.primaryContact,value:nm});
+      if(chosen.value)     cf.push({id:F.email,value:chosen.value});
+      if(chosen.position)  cf.push({id:F.jobTitle,value:chosen.position});
+      if(chosen.confidence)cf.push({id:F.hunterConfidence,value:chosen.confidence});
+    }
+    const body={name:lead.name,status:'new lead',assignees:[NICK_ID],custom_fields:cf};
+    const r=await fetch('https://api.clickup.com/api/v2/list/'+LIST_ID+'/task',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':CLICKUP_KEY},
+      body:JSON.stringify(body),
+    });
+    const data=await r.json();
+    if(r.status===400&&data.err&&data.err.toLowerCase().includes('already')){lead.clickupStatus='exists';}
+    else if(!r.ok) throw new Error(data.err||'ClickUp error '+r.status);
+    else lead.clickupStatus='added';
+  } catch(e){lead.clickupStatus='error';console.error(e);}
+  updateStats(); renderLeads();
+}
+
+async function pushAll(){
+  const todo=getFiltered().filter(l=>l.clickupStatus==='idle'&&(l.hunterStatus==='done'||l.hunterStatus==='notfound'||!l.domain));
+  for(const l of todo){await pushToClickup(l.id);await sleep(400);}
+}
+
+function selectContact(leadId,idx){
+  const lead=leads.find(l=>l.id===leadId);
+  if(lead){lead.selectedContact=idx;renderLeads();}
+}
+
+function setFilter(f){
+  currentFilter=f;
+  ['weak','all','strong'].forEach(n=>{
+    const el=document.getElementById('filter-'+n);
+    if(el) el.classList.toggle('active',n===f);
+  });
+  updateFilterLabels(); renderLeads();
+}
+
+function getFiltered(){
+  if(currentFilter==='weak')   return leads.filter(l=>l.flagged);
+  if(currentFilter==='strong') return leads.filter(l=>!l.flagged);
+  return leads;
+}
+
+function updateFilterLabels(){
+  const weak=leads.filter(l=>l.flagged).length;
+  const ew=document.getElementById('filter-weak'); if(ew) ew.textContent='Weak profiles ('+weak+')';
+  const ea=document.getElementById('filter-all');  if(ea) ea.textContent='All ('+leads.length+')';
+  const es=document.getElementById('filter-strong');if(es)es.textContent='Strong ('+(leads.length-weak)+')';
+}
+
+function updateStats(){
+  document.getElementById('stat-total').textContent    =leads.length;
+  document.getElementById('stat-weak').textContent     =leads.filter(l=>l.flagged).length;
+  document.getElementById('stat-enriched').textContent =leads.filter(l=>l.hunterStatus==='done').length;
+  document.getElementById('stat-pushed').textContent   =leads.filter(l=>l.clickupStatus==='added').length;
+  updateFilterLabels();
+}
+
+function renderLeads(){
+  const container=document.getElementById('leads-container');
+  const filtered=getFiltered();
+  if(!filtered.length){container.innerHTML='<p style="color:#3d3f4d;padding:20px 0;">No leads in this category.</p>';return;}
+  container.innerHTML=filtered.map(lead=>{
+    const rc=lead.rating<3.5?'r-bad':lead.rating<4.5?'r-mid':'r-good';
+    const rt=lead.rating?lead.rating.toFixed(1):'--';
+    let acts='';
+    if(lead.hunterStatus==='idle'&&lead.domain)   acts+='<button class="btn-action" onclick="enrichLead(\''+lead.id+'\')">Find contacts via Hunter.io</button>';
+    else if(lead.hunterStatus==='idle')             acts+='<span class="lead-status">No website listed</span>';
+    else if(lead.hunterStatus==='loading')          acts+='<span class="lead-status">Searching Hunter.io\u2026</span>';
+    else if(lead.hunterStatus==='notfound')         acts+='<span class="lead-status">No contacts found on Hunter</span>';
+    else if(lead.hunterStatus==='error')            acts+='<span class="lead-status" style="color:#e05c5c;">Hunter error</span>';
+    else if(lead.hunterStatus==='done')             acts+='<span class="badge bg-green">'+lead.contacts.length+' contact'+(lead.contacts.length>1?'s':'')+' found</span>';
+    const canPush=lead.clickupStatus==='idle'&&(lead.hunterStatus==='done'||lead.hunterStatus==='notfound'||!lead.domain);
+    if(canPush)                                     acts+=' <button class="btn-action" onclick="pushToClickup(\''+lead.id+'\')"> Push to ClickUp</button>';
+    else if(lead.clickupStatus==='loading')         acts+=' <span class="lead-status">Adding to ClickUp\u2026</span>';
+    else if(lead.clickupStatus==='added')           acts+=' <span class="badge bg-green">\u2713 In ClickUp</span>';
+    else if(lead.clickupStatus==='exists')          acts+=' <span class="badge bg-blue">Already exists</span>';
+    else if(lead.clickupStatus==='error')           acts+=' <span class="badge bg-red">Push failed</span>';
+    let contacts='';
+    if(lead.hunterStatus==='done'&&lead.contacts&&lead.contacts.length>0){
+      contacts='<div class="contacts-list">'+lead.contacts.map((c,i)=>{
+        const nm=[c.first_name,c.last_name].filter(Boolean).join(' ')||'(no name)';
+        const isSel=i===(lead.selectedContact||0);
+        return '<div class="contact-row'+(isSel?' sel':'')+'" onclick="selectContact(\''+lead.id+'\','+i+')">'
+          +'<div class="radio'+(isSel?' sel':'')+'"></div>'
+          +'<div class="contact-info">'
+            +'<div class="contact-name">'+nm+'</div>'
+            +'<div class="contact-detail">'+c.value+(c.position?' &middot; '+c.position:'')+'</div>'
+          +'</div>'
+          +'<div class="contact-score">'+c.confidence+'%</div>'
+        +'</div>';
+      }).join('')+'</div>';
+    }
+    return '<div class="lead'+(lead.flagged?' flagged':'')+'">'
+      +'<div class="lead-top">'
+        +'<div class="lead-name">'+lead.name+'</div>'
+        +(lead.flagged?'<span class="badge bg-orange">weak profile</span>':'')
+        +(lead.website?'<a href="'+lead.website+'" target="_blank" style="font-size:12px;margin-left:6px;">\u2197</a>':'')
+      +'</div>'
+      +'<div class="lead-meta">'
+        +'<span class="'+rc+'">\u2605 '+rt+'</span>'
+        +'<span>'+lead.reviews.toLocaleString()+' reviews</span>'
+        +(lead.phone?'<span>'+lead.phone+'</span>':'')
+        +(lead.city?'<span>'+lead.city+'</span>':'')
+      +'</div>'
+      +'<div class="lead-actions">'+acts+'</div>'
+      +contacts
+    +'</div>';
+  }).join('');
+}
+
+function extractDomain(url){
+  if(!url) return null;
+  try{const u=new URL(url.startsWith('http')?url:'https://'+url);return u.hostname.replace(/^www\./,'');}
+  catch{return null;}
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+</body>
+</html>
