@@ -204,7 +204,7 @@ async function runSearch(){
       website:r.website||null,
       phone:r.phone||null,
       city:city,
-      mapsUrl:r.url||r.place_url||null,
+      mapsUrl:r.url||r.place_url||r.place_link||r.link||(r.place_id?"https://www.google.com/maps/place/?q=place_id:"+r.place_id:null),
       domain:extractDomain(r.website),
       contacts:null,selectedContact:0,
       hunterStatus:'idle',clickupStatus:'idle',
@@ -377,9 +377,9 @@ function renderLeads(){
     }
     return '<div class="lead'+(lead.flagged?' flagged':'')+'">'
       +'<div class="lead-top">'
-        +'<div class="lead-name">'+lead.name+'</div>'
+        +'<div class="lead-name">'+(lead.mapsUrl?'<a href="'+lead.mapsUrl+'" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed #aaa;">'+lead.name+'</a>':lead.name)+'</div>'
         +(lead.flagged?'<span class="badge bg-orange">weak profile</span>':'')
-        +(lead.website?'<a href="'+lead.website+'" target="_blank" style="font-size:12px;margin-left:6px;">\u2197</a>':'')
+        +(lead.mapsUrl?'<a href="'+lead.mapsUrl+'" target="_blank" style="font-size:12px;margin-left:8px;color:#e8501a;">Maps \u2197</a>':'')+(lead.website?'<a href="'+lead.website+'" target="_blank" style="font-size:12px;margin-left:6px;">Site \u2197</a>':'')
       +'</div>'
       +'<div class="lead-meta">'
         +'<span class="'+rc+'">\u2605 '+rt+'</span>'
