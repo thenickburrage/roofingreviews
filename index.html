@@ -186,7 +186,7 @@ async function runSearch(){
   status.innerHTML='<div class="loading-box"><p>Sending request to Outscraper\u2026</p></div>';
   try{
     const q=encodeURIComponent('roofing contractors '+city);
-    const r=await fetch('https://api.app.outscraper.com/maps/search-v3?query='+q+'&limit=5&language=en',{headers:{'X-API-KEY':outscraperKey}});
+    const r=await fetch('https://api.app.outscraper.com/maps/search-v3?query='+q+'&limit=50&language=en',{headers:{'X-API-KEY':outscraperKey}});
     if(!r.ok) throw new Error('Outscraper error '+r.status+' \u2014 please check your API key');
     const d=await r.json();
     let results=[];
