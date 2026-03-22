@@ -260,10 +260,12 @@ async function pushToClickup(id){
   lead.clickupStatus='loading'; renderLeads();
   try{
     const chosen=(lead.contacts&&lead.contacts.length>0)?lead.contacts[lead.selectedContact||0]:null;
+    const chosenIdx=lead.selectedContact||0;
     const allContactsText=(lead.contacts&&lead.contacts.length>0)
-      ?lead.contacts.map(c=>{
+      ?'All contacts found via Hunter.io:\n\n'+lead.contacts.map((c,i)=>{
           const nm=[c.first_name,c.last_name].filter(Boolean).join(' ')||'(no name)';
-          return nm+' \u2014 '+(c.position||'no title')+' \u2014 '+c.value+' ('+(c.confidence||0)+'% confidence)';
+          const tag=i===chosenIdx?' <- SELECTED':'';
+          return (i+1)+'. '+nm+' \u2014 '+(c.position||'no title')+' \u2014 '+c.value+' ('+(c.confidence||0)+'% confidence)'+tag;
         }).join('\n')
       :'No contacts found via Hunter.io';
 
