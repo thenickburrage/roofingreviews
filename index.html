@@ -128,12 +128,14 @@
       <div class="stat"><div class="stat-label">In ClickUp</div><div class="stat-value sv-green" id="stat-pushed">0</div></div>
     </div>
     <div class="filter-row">
-      <button class="filter-btn active" id="filter-weak" onclick="setFilter('weak')">Weak profiles</button>
+      <button class="filter-btn active" id="filter-weak" onclick="setFilter('weak')">Weak</button>
       <button class="filter-btn" id="filter-all" onclick="setFilter('all')">All</button>
       <button class="filter-btn" id="filter-strong" onclick="setFilter('strong')">Strong</button>
+      <button class="filter-btn" id="filter-dismissed" onclick="setFilter('dismissed')">Gone (0)</button>
       <div class="filter-actions">
         <button class="btn-small" id="btn-enrich-all" onclick="enrichAll()">Find all emails</button>
         <button class="btn-small" id="btn-push-all" onclick="pushAll()">Push all to ClickUp</button>
+        <button class="btn-small" onclick="if(confirm('Clear all saved leads and start fresh?'))clearLeads();">Clear all</button>
       </div>
     </div>
     <div id="leads-container"></div>
@@ -163,6 +165,11 @@ const F={
 
 let leads=[],currentFilter='weak',outscraperKey='',hunterKey='',currentCity='';
 
+function saveLeads(){try{localStorage.setItem('rpm_leads',JSON.stringify(leads));}catch(e){}}
+function loadLeads(){try{const d=localStorage.getItem('rpm_leads');if(d)leads=JSON.parse(d);}catch(e){leads=[];}}
+function clearLeads(){leads=[];saveLeads();updateStats();renderLeads();}
+function dismissLead(id){const l=leads.find(x=>x.id===id);if(l){l.dismissed=true;saveLeads();renderLeads();updateStats();}}
+
 function showView(v){
   ['setup','search','results'].forEach(n=>{
     document.getElementById('view-'+n).style.display=n===v?'block':'none';
@@ -179,7 +186,7 @@ function startApp(){
 async function runSearch(){
   const city=document.getElementById('city-input').value.trim();
   if(!city)return;
-  currentCity=city; leads=[];
+  currentCity=city;
   const btn=document.getElementById('btn-search');
   const status=document.getElementById('search-status');
   btn.disabled=true; btn.textContent='Scanning\u2026';
@@ -196,7 +203,7 @@ async function runSearch(){
       results=d.data?.[0]||d.results||[];
     }
     if(!results.length) throw new Error('No results \u2014 try a different format e.g. "Tampa FL"');
-    leads=results.map((r,i)=>({
+    const newLeads=results.map((r,i)=>({
       id:r.place_id||'lead-'+i,
       name:r.name||'Unknown',
       rating:parseFloat(r.rating)||0,
@@ -209,9 +216,14 @@ async function runSearch(){
       contacts:null,selectedContact:0,
       hunterStatus:'idle',clickupStatus:'idle',
       flagged:(parseFloat(r.rating)||0)<4.5||(parseInt(r.reviews)||0)<100,
+      dismissed:false,
     }));
+    const existingIds=new Set(leads.map(l=>l.id));
+    const merged=newLeads.filter(l=>!existingIds.has(l.id));
+    leads=[...leads,...merged];
+    saveLeads();
     showView('results');
-    document.getElementById('results-title').textContent=city+' \u2014 '+leads.length+' companies found';
+    document.getElementById('results-title').textContent=leads.length+' total companies ('+merged.length+' new from '+city+')';
     setFilter('weak'); updateStats();
   } catch(e){
     status.innerHTML='<div class="error-box"><p>'+e.message+'</p></div>';
@@ -235,15 +247,15 @@ async function pollOutscraper(taskId,statusEl){
 async function enrichLead(id){
   const lead=leads.find(l=>l.id===id);
   if(!lead||!lead.domain) return;
-  lead.hunterStatus='loading'; renderLeads();
+  lead.hunterStatus='loading'; saveLeads(); renderLeads();
   try{
     const r=await fetch('https://api.hunter.io/v2/domain-search?domain='+lead.domain+'&api_key='+hunterKey+'&limit=10');
     const d=await r.json();
     const contacts=d.data?.emails||[];
-    if(!contacts.length){lead.hunterStatus='notfound';}
+    if(!contacts.length){lead.hunterStatus='notfound'; saveLeads();}
     else{
       contacts.sort((a,b)=>(b.confidence||0)-(a.confidence||0));
-      lead.contacts=contacts; lead.selectedContact=0; lead.hunterStatus='done';
+      lead.contacts=contacts; lead.selectedContact=0; lead.hunterStatus='done'; saveLeads();
     }
   } catch{lead.hunterStatus='error';}
   updateStats(); renderLeads();
@@ -257,7 +269,7 @@ async function enrichAll(){
 async function pushToClickup(id){
   const lead=leads.find(l=>l.id===id);
   if(!lead) return;
-  lead.clickupStatus='loading'; renderLeads();
+  lead.clickupStatus='loading'; saveLeads(); renderLeads();
   try{
     const chosen=(lead.contacts&&lead.contacts.length>0)?lead.contacts[lead.selectedContact||0]:null;
     const chosenIdx=lead.selectedContact||0;
@@ -298,6 +310,7 @@ async function pushToClickup(id){
     if(r.status===400&&data.err&&data.err.toLowerCase().includes('already')){lead.clickupStatus='exists';}
     else if(!r.ok) throw new Error(data.err||'ClickUp error '+r.status);
     else lead.clickupStatus='added';
+    saveLeads();
   } catch(e){lead.clickupStatus='error';console.error(e);}
   updateStats(); renderLeads();
 }
@@ -314,7 +327,7 @@ function selectContact(leadId,idx){
 
 function setFilter(f){
   currentFilter=f;
-  ['weak','all','strong'].forEach(n=>{
+  ['weak','all','strong','dismissed'].forEach(n=>{
     const el=document.getElementById('filter-'+n);
     if(el) el.classList.toggle('active',n===f);
   });
@@ -322,16 +335,20 @@ function setFilter(f){
 }
 
 function getFiltered(){
-  if(currentFilter==='weak')   return leads.filter(l=>l.flagged);
-  if(currentFilter==='strong') return leads.filter(l=>!l.flagged);
-  return leads;
+  if(currentFilter==='dismissed') return leads.filter(l=>l.dismissed);
+  if(currentFilter==='weak')   return leads.filter(l=>l.flagged&&!l.dismissed);
+  if(currentFilter==='strong') return leads.filter(l=>!l.flagged&&!l.dismissed);
+  return leads.filter(l=>!l.dismissed);
 }
 
 function updateFilterLabels(){
-  const weak=leads.filter(l=>l.flagged).length;
-  const ew=document.getElementById('filter-weak'); if(ew) ew.textContent='Weak profiles ('+weak+')';
-  const ea=document.getElementById('filter-all');  if(ea) ea.textContent='All ('+leads.length+')';
-  const es=document.getElementById('filter-strong');if(es)es.textContent='Strong ('+(leads.length-weak)+')';
+  const active=leads.filter(l=>!l.dismissed);
+  const weak=active.filter(l=>l.flagged).length;
+  const dismissed=leads.filter(l=>l.dismissed).length;
+  const ew=document.getElementById('filter-weak'); if(ew) ew.textContent='Weak ('+weak+')';
+  const ea=document.getElementById('filter-all');  if(ea) ea.textContent='All ('+active.length+')';
+  const es=document.getElementById('filter-strong');if(es)es.textContent='Strong ('+(active.length-weak)+')';
+  const ed=document.getElementById('filter-dismissed');if(ed)ed.textContent='Gone ('+dismissed+')';
 }
 
 function updateStats(){
@@ -356,6 +373,7 @@ function renderLeads(){
     else if(lead.hunterStatus==='notfound')         acts+='<span class="lead-status">No contacts found on Hunter</span>';
     else if(lead.hunterStatus==='error')            acts+='<span class="lead-status" style="color:#e05c5c;">Hunter error</span>';
     else if(lead.hunterStatus==='done')             acts+='<span class="badge bg-green">'+lead.contacts.length+' contact'+(lead.contacts.length>1?'s':'')+' found</span>';
+    if(!lead.dismissed) acts+=' <button class="btn-small" onclick="dismissLead(\''+lead.id+'\')">Mark gone</button>';
     const canPush=lead.clickupStatus==='idle'&&(lead.hunterStatus==='done'||lead.hunterStatus==='notfound'||!lead.domain);
     if(canPush)                                     acts+=' <button class="btn-action" onclick="pushToClickup(\''+lead.id+'\')"> Push to ClickUp</button>';
     else if(lead.clickupStatus==='loading')         acts+=' <span class="lead-status">Adding to ClickUp\u2026</span>';
@@ -401,6 +419,20 @@ function extractDomain(url){
   catch{return null;}
 }
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// Init — load saved leads on startup
+loadLeads();
+if(leads.length>0){
+  outscraperKey=localStorage.getItem('rpm_outscraper')||'';
+  hunterKey=localStorage.getItem('rpm_hunter')||'';
+  showView('results');
+  document.getElementById('results-title').textContent=leads.length+' companies (saved)';
+  setFilter('weak'); updateStats();
+} else {
+  const ok=localStorage.getItem('rpm_outscraper');
+  const hk=localStorage.getItem('rpm_hunter');
+  if(ok&&hk){outscraperKey=ok;hunterKey=hk;showView('search');}
+}
 </script>
 </body>
 </html>
